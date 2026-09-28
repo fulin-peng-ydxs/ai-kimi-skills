@@ -1,6 +1,6 @@
 ---
 name: server-operation-index
-description: 生成服务器总运维文档（index.md）
+description: 基于服务器实际探测与已有服务文档生成运维总览，记录服务用途、运行单元、端口、依赖、数据及维护入口；不推断未证实的依赖或执行服务变更。
 ---
 
 # 服务器总运维文档生成
@@ -21,7 +21,7 @@ description: 生成服务器总运维文档（index.md）
 
 ### 1. 收集服务器元信息
 
-执行以下只读命令，提取关键信息填入模板：
+先确定目标主机、可访问范围和输出位置，再按实际可用工具选择以下只读命令；进程参数和配置可能含秘密，输出前脱敏，工具缺失不能视为服务不存在：
 
 ```bash
 # 主机名与操作系统
@@ -58,7 +58,7 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 
 ### 2. 扫描已有子文档
 
-列出 `~/agent/operation/docs/` 下除 `index.md` 之外的 `.md` 文件，生成“子文档索引”表格。
+列出所选输出目录（默认 `~/agent/operation/docs/`）下属于目标主机、除 `index.md` 之外的 `.md` 文件，生成“子文档索引”表格。
 
 | 列 | 说明 |
 |----|------|
@@ -66,7 +66,7 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 | 文档路径 | 相对链接，如 [`nacos.md`](./nacos.md) |
 | 说明 | 从该 md 文件的第一段或 `# 服务概述` 提取一句简介 |
 
-若 `docs` 目录不存在，先创建它：`mkdir -p ~/agent/operation/docs`。
+若所选输出目录不存在，在落盘时创建该目录。
 
 ### 3. 探测运行中的服务
 
@@ -80,16 +80,16 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 
 | 字段 | 说明 |
 |------|------|
-| 服务名 | 标准名称 |
+| 服务名 | 标准名称及其业务用途、调用方 |
 | 版本 | 探测到的版本号，未知则写“待确认” |
-| 部署方式 | 宿主机 systemd / 宿主机二进制 / Docker Swarm / Docker Compose / 容器运行 |
+| 部署方式 | 实际运行单元及管理方式，区分常驻服务、一次性任务、宿主机调度和构建工具 |
 | 程序目录 | 安装路径 |
 | 启动方式 | 启动命令或 systemctl 服务名 |
 | 停止方式 | 停止命令 |
 | 监听端口 | 从 `ss -tlnp` 提取 |
 | 配置文件 | 主配置文件路径 |
 | 数据目录 | 数据/持久化路径 |
-| 运维文档 | 指向 `~/agent/operation/docs/{服务名}.md` 的链接（即使文档尚未生成） |
+| 运维文档 | 链接到实际存在的同主机子文档；尚未生成的只写“待补充”，不生成失效链接 |
 
 ### 4. 生成端口矩阵
 
@@ -102,7 +102,7 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 
 ### 5. 梳理依赖关系
 
-根据业务常识和当前服务器实际配置，绘制服务依赖关系图：
+根据配置引用、部署编排或实际调用证据绘制依赖图，解释箭头是调用、数据流还是启动依赖；仅共处一台主机或符合业务常识不能证明依赖。以下只是表达示意，不得直接复制为事实：
 
 ```text
 业务应用
@@ -118,13 +118,14 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 
 ### 6. 填充模板并写入
 
-使用本技能目录下的 `template.md` 作为蓝本，将第 1-5 步收集的数据替换占位符。
+使用本技能目录下的 `template.md` 作为蓝本，将第 1-5 步收集的数据替换占位符。模板说明不进入交付正文，无关章节可省略；保留证据边界和实际未决问题。
 
-输出路径固定为：`~/agent/operation/docs/index.md`。
+优先使用用户指定路径或同主机已有总览；否则使用 `~/agent/operation/docs/index.md`。多环境必须区分主机归属，不能覆盖另一环境的总览。
 
 ### 7. 验证与报告
 
-- 读取生成的 `index.md`，确认章节完整、表格格式正确、链接可用。
+- 读取生成的 `index.md`，检查读者能否识别业务入口、运行单元、调用与数据方向、故障影响及对应维护入口；模板示例与占位符必须全部替换或移除。
+- 分开说明可复用方案与本机实际状态，标注探测时间、证据范围和差异；命令未执行须标为未验证，进程存在不等于业务健康，无连接快照不等于长期无人调用。
 - 向用户报告文档路径、探测到的服务数量、子文档数量、待确认项。
 - 若生成了新文件或做了重大更新，按 `AGENTS.md` 要求追加 `~/agent/operation/operation-log.md`。
 
@@ -139,6 +140,9 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 | `{{docker_version}}` | Docker 版本 | 有则填 |
 | `{{swarm_role}}` | Swarm 角色 | 有则填 |
 | `{{probe_time}}` | 探测时间 | 是 |
+| `{{runtime_diagram}}` | 实际运行单元、业务入口和数据方向图 | 是 |
+| `{{special_mechanisms}}` | 实际特殊部署机制，无则说明或移除章节 | 有则填 |
+| `{{operation_entry_table}}` | 带前置条件、结果和验证状态的维护入口 | 是 |
 | `{{sub_docs_table}}` | 子文档索引 Markdown 表格 | 是 |
 | `{{service_list}}` | 中间件与基础服务清单 | 是 |
 | `{{stack_table}}` | Docker Stack 清单表格 | 有则填 |
@@ -154,7 +158,7 @@ ps aux | grep -E 'nacos|redis|nginx|zookeeper|kafka|mysql|mongodb|prometheus|gra
 
 - 文档语言：与用户当前对话语言一致。
 - 子文档命名：`{服务英文名}.md`，全部小写。
-- 路径：统一使用 `~/agent/operation/docs/index.md`。
+- 路径：遵循上述输出优先级，所有子文档和模板链接按实际位置解析。
 - 状态未知项：明确写“待确认”或“未探测到”，不臆造。
 - 敏感信息：若探测输出包含密码、Token、密钥，写入前必须脱敏。
 
