@@ -1,9 +1,9 @@
 ---
-name: process-usage-report
+name: system-process-usage-analysis
 description: 分析当前电脑的进程使用情况并输出结构化报告。适用于排查电脑卡顿、风扇狂转、内存占用异常、CPU 飙高、进程数量过多或怀疑某类程序持续占用资源的场景；重点统计当前进程数量、CPU/内存/IO 高占用进程、进程分类分布，并识别最可能引起卡顿的嫌疑进程，帮助后续精准处理。
 ---
 
-# Process Usage Report
+# 进程资源分析
 
 这个技能用于查看当前电脑的整体进程使用情况，并输出一份适合排查卡顿问题的报告。
 

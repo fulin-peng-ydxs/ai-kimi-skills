@@ -3,7 +3,7 @@ name: git-push
 description: 推送 Git 提交：先确定提交文件范围，再生成提交信息并让用户确认，随后按确认范围执行 git add、git commit，最后在用户明确同意时执行 git push。
 ---
 
-# Git Push
+# Git 提交与推送
 
 请按以下流程执行 Git 提交与推送操作。
 

@@ -1,9 +1,9 @@
 ---
-name: git-commit-msg
+name: git-commit-message-authoring
 description: 根据用户确认的 Git 改动范围生成规范化提交消息：先确定文件范围，再读取改动摘要，生成提交文案后直接输出；只输出提交消息，不执行 git add、git commit 或 git push。
 ---
 
-# Git Commit Msg
+# Git 提交消息编写
 
 根据当前 Git 工作区的改动，生成符合项目规范的提交消息。
 
