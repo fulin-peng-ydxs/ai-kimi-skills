@@ -18,7 +18,6 @@
 | `find-skills` | 帮助发现和安装开放 Agent skills 生态中的技能，适用于查找特定领域能力、工具、模板或工作流。 |
 | `git-commit-message-authoring` | 根据用户确认的 Git 改动范围生成规范化提交消息；只输出提交消息，不执行 `git add`、`git commit` 或 `git push`。 |
 | `git-push` | 推送 Git 提交：先确认提交文件范围，再生成并确认提交信息，随后按确认范围执行 `git add`、`git commit`，最后在用户明确同意时执行 `git push`。 |
-| `operation-docs` | 调用 operation-workflow 的单位手册模式，创建或更新组件、实例及集群的运维手册。 |
 | `system-process-usage-analysis` | 分析当前电脑进程使用情况，统计进程数量、CPU/内存/IO 高占用进程和分类分布，帮助定位卡顿原因。 |
 
 ## 使用方式
